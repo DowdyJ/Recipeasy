@@ -1,0 +1,5 @@
+.vscode/
+.local-chromium/
+bin/
+obj/
+*.*~
