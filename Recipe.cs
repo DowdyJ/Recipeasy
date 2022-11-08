@@ -33,16 +33,18 @@ public struct Recipe
 
     public struct Ingredient 
     {
-        public Ingredient(String quantity, String unit, String itemName) 
+        public Ingredient(String quantity, String unit, String itemName, String extraNotes) 
         {
             this.quantity = quantity;
             this.unit = unit;
             this.itemName = itemName;
+            this.extraNotes = extraNotes;
         }
 
         public String quantity;
         public String unit;
         public String itemName;
+        public String extraNotes;
     }
 
     public struct BlogElement 

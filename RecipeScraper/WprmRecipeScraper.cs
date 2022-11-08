@@ -48,6 +48,12 @@ public class WprmRecipeScraper : IRecipeScraper
         return recipe;
     }
 
+    private async Task<List<String>> ExtractInstructionsFromPage(IPage page, List<String> errors) 
+    {
+
+        return null;
+    }
+
 
     private async Task<List<Recipe.IngredientGroup>> ExtractIngredientGroupsFromPage(IPage page, bool metric, List<String> errors) 
     {
@@ -92,7 +98,8 @@ public class WprmRecipeScraper : IRecipeScraper
                 titleText = "TITLE";
             }
 
-            string? ingredientJson = (string?) await element.EvaluateFunctionAsync("e => {try{function extractQuantity(liNode){try{var amount = liNode.querySelector(\"span[class='wprm-recipe-ingredient-amount']\").innerText;return amount;}catch (err){return \"\";}}function extractUnit(liNode){try{var unit = liNode.querySelector(\"span[class='wprm-recipe-ingredient-unit']\").innerText;return unit;}catch (err){return \"\";}}function extractName(liNode){try{var name = liNode.querySelector(\"span[class='wprm-recipe-ingredient-name']\").innerText;return name;}catch (err){return \"\";}}var ingredientNodes = e.querySelectorAll(\"li[class='wprm-recipe-ingredient']\");class Ingredient{constructor(quantity, unit, name){this.quantity = quantity;this.unit = unit;this.name = name;}}const ingredientsList = [];for (let i = 0; i < ingredientNodes.length; i++){var quantity = extractQuantity(ingredientNodes[i]);var unit = extractUnit(ingredientNodes[i]);var name = extractName(ingredientNodes[i]);ingredientsList[i] = new Ingredient(quantity, unit, name);}var jsonStringOfIngredientsList = JSON.stringify(ingredientsList);return jsonStringOfIngredientsList;}catch(err){}}");
+            string? ingredientJson = (string?) await element.EvaluateFunctionAsync(
+                "e => {try{function extractQuantity(liNode){try{var amount = liNode.querySelector(\"span[class='wprm-recipe-ingredient-amount']\").innerText;return amount;}catch (err){return \"\";}}function extractUnit(liNode){try{var unit = liNode.querySelector(\"span[class='wprm-recipe-ingredient-unit']\").innerText;return unit;}catch (err){return \"\";}}function extractExtraNotes(liNode){try{var extraNotes = liNode.querySelector(\"span[class*='wprm-recipe-ingredient-notes']\").innerText;return extraNotes;}catch(err){return\"\";}}function extractName(liNode){try{var name = liNode.querySelector(\"span[class='wprm-recipe-ingredient-name']\").innerText;return name;}catch (err){return \"\";}}var ingredientNodes = e.querySelectorAll(\"li[class='wprm-recipe-ingredient']\");class Ingredient{constructor(quantity, unit, name, extraNotes){this.quantity = quantity;this.unit = unit;this.name = name;this.extraNotes = extraNotes;}}const ingredientsList = [];for (let i = 0; i < ingredientNodes.length; i++){var quantity = extractQuantity(ingredientNodes[i]);var unit = extractUnit(ingredientNodes[i]);var name = extractName(ingredientNodes[i]);var extraNotes = extractExtraNotes(ingredientNodes[i]);ingredientsList[i] = new Ingredient(quantity, unit, name, extraNotes);}var jsonStringOfIngredientsList = JSON.stringify(ingredientsList);return jsonStringOfIngredientsList;}catch(err){}}");
  
             if (ingredientJson is null)
             {
@@ -112,7 +119,7 @@ public class WprmRecipeScraper : IRecipeScraper
 
             foreach (var ingredient in parsedIngredients["IngredientList"]) 
             {
-                newGroup.ingredients.Add(new Recipe.Ingredient(((string?)ingredient["quantity"]), ((string?)ingredient["unit"]), ((string?)ingredient["name"])));
+                newGroup.ingredients.Add(new Recipe.Ingredient(((string?)ingredient["quantity"]), ((string?)ingredient["unit"]), ((string?)ingredient["name"]), ((string?)(ingredient["extraNotes"]))));
             }
 
             ingredientGroups.Add(newGroup);

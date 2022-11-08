@@ -16,7 +16,7 @@ public class ConsoleRecipePrinter : IRecipePrinter
         {
             Console.WriteLine($"**{ig.groupName}**");
             foreach (Recipe.Ingredient ingredient in ig.ingredients)
-                Console.WriteLine($"{ingredient.quantity} {ingredient.unit} {ingredient.itemName}");
+                Console.WriteLine($"{ingredient.quantity} {ingredient.unit} {ingredient.itemName} {ingredient.extraNotes}");
         }
 
         Console.WriteLine("******************************");
