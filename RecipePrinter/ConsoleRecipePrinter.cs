@@ -11,6 +11,7 @@ public class ConsoleRecipePrinter : IRecipePrinter
         Console.WriteLine(recipe.Title);
 
         Console.WriteLine("------------------------------");
+        Console.WriteLine("**INGREDIENTS**");
 
         foreach (Recipe.IngredientGroup ig in recipe.Ingredients)
         {
@@ -19,8 +20,22 @@ public class ConsoleRecipePrinter : IRecipePrinter
                 Console.WriteLine($"{ingredient.quantity} {ingredient.unit} {ingredient.itemName} {ingredient.extraNotes}");
         }
 
+        Console.WriteLine("------------------------------");
+        Console.WriteLine("**INSTRUCTIONS**");
+
+        foreach (Recipe.Instruction i in recipe.Instructions)
+            PrintInstructions(i);
+
         Console.WriteLine("******************************");
 
         return "";
+    }
+
+    void PrintInstructions(Recipe.Instruction instruction) 
+    {
+        Console.WriteLine($"{instruction.instructionSymbol} {instruction.instructionText}");
+        if (instruction.subInstructions != null)
+            foreach (Recipe.Instruction si in instruction.subInstructions)
+                PrintInstructions(si);
     }
 }

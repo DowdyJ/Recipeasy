@@ -24,11 +24,11 @@ public class WprmRecipeScraper : IRecipeScraper
 
         Recipe recipe = new Recipe();
 
-        Task<List<String>> instructionsTask;
+        Task<List<Recipe.Instruction>> instructionsTask;
         if (scrapeInstruction) 
-            instructionsTask = Task.Run<List<String>>(() => { return new List<String>(); });
+            instructionsTask = ExtractInstructionsFromPage(page, errors);
         else
-            instructionsTask = Task.Run<List<String>>(() => { return new List<String>(); });
+            instructionsTask = Task.Run<List<Recipe.Instruction>>(() => { return new List<Recipe.Instruction>(); });
 
 
         Task<List<Recipe.IngredientGroup>> ingredientsTask;
@@ -48,11 +48,41 @@ public class WprmRecipeScraper : IRecipeScraper
         return recipe;
     }
 
-    private async Task<List<String>> ExtractInstructionsFromPage(IPage page, List<String> errors) 
+    private async Task<List<Recipe.Instruction>> ExtractInstructionsFromPage(IPage page, List<String> errors) 
     {
+        IElementHandle instructionsContainer = await page.QuerySelectorAsync("div[class*='wprm-recipe-instructions-container']");
 
-        return null;
+        IElementHandle[] instructionGroups = await instructionsContainer.QuerySelectorAllAsync("div[class='wprm-recipe-instruction-group']");
+        
+        List<Recipe.Instruction> instructions = new List<Recipe.Instruction>();
+
+        foreach (IElementHandle iGroup in instructionGroups)
+        {
+            String groupTitle = (string?) await iGroup.EvaluateFunctionAsync("e => {try {return e.getElementsByTagName(\"h4\")[0].innerText} catch(err){return\"\"}}") ?? "";
+            
+            List<Recipe.Instruction> subInstructions = new List<Recipe.Instruction>();
+
+            String jsonResponse = await iGroup.EvaluateFunctionAsync<String>(
+                "e => {try{var listOfListElements = e.getElementsByTagName(\"li\"); function extractInstructionText(li){try {return li.querySelector(\"div[class*='wprm-recipe-instruction-text']\").innerText;} catch(err) {return \"\";}}class Instruction {constructor(instructionText){this.instructionText = instructionText;}}const listOfInstructions = [];for (let i=0; i<listOfListElements.length;i++) {listOfInstructions[i] = new Instruction(extractInstructionText(listOfListElements[i]));}return JSON.stringify(listOfInstructions);}catch(err){return \"\";}}"
+            );
+
+            jsonResponse = jsonResponse.Insert(0, "{InstructionList:");
+            jsonResponse = jsonResponse.Insert(jsonResponse.Length,"}");
+
+            JObject parsedInstructions = JObject.Parse(jsonResponse);
+
+            int i = 0;
+            foreach (var instruction in parsedInstructions["InstructionList"])
+            {
+                subInstructions.Add(new Recipe.Instruction((++i).ToString(), (string?)instruction["instructionText"] ?? "", null));
+            }
+            
+            instructions.Add(new Recipe.Instruction("", groupTitle, subInstructions));
+        }
+
+        return instructions;
     }
+
 
 
     private async Task<List<Recipe.IngredientGroup>> ExtractIngredientGroupsFromPage(IPage page, bool metric, List<String> errors) 
