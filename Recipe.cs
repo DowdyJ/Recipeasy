@@ -2,23 +2,40 @@ namespace Recipeasy;
 
 public struct Recipe 
 {
-    public Recipe(String title, List<IngredientGroup> ingredients, List<Instruction> instructions, List<Comment> comments) 
+    public Recipe(String title, List<IngredientGroup> ingredients, List<Instruction> instructions, List<Comment> comments, List<NutritionFact> nutritionFacts) 
     {
         this.title = title;
         this.ingredients = ingredients;
         this.instructions = instructions;
         this.comments = comments;
+        this.nutritionFacts = nutritionFacts;
     }
 
     public String Title { get => title; set => title = value;}
     public List<IngredientGroup> Ingredients { get => ingredients; set => ingredients = value;}
     public List<Instruction> Instructions { get => instructions; set => instructions = value;}
     public List<Comment> Comments { get => comments; set => comments = value;}
+    public List<NutritionFact> NutritionFacts { get => nutritionFacts; set => nutritionFacts = value;}
 
     private String title;
     private List<IngredientGroup> ingredients;
     private List<Instruction> instructions;
     private List<Comment> comments;
+    private List<NutritionFact> nutritionFacts;
+
+    public struct NutritionFact 
+    {
+        public NutritionFact(String label, String unit, String value) 
+        {
+            this.label = label;
+            this.unit = unit;
+            this.value = value;
+        }
+
+        public String label;
+        public String value;
+        public String unit;
+    }
 
     public struct Comment 
     {

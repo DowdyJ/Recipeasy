@@ -11,6 +11,11 @@ public class ConsoleRecipePrinter : IRecipePrinter
         Console.WriteLine(recipe.Title);
 
         Console.WriteLine("------------------------------");
+        Console.WriteLine("**NUTRITION FACTS**");
+
+        PrintNutritionFacts(recipe);
+
+        Console.WriteLine("------------------------------");
         Console.WriteLine("**INGREDIENTS**");
 
         foreach (Recipe.IngredientGroup ig in recipe.Ingredients)
@@ -37,5 +42,13 @@ public class ConsoleRecipePrinter : IRecipePrinter
         if (instruction.subInstructions != null)
             foreach (Recipe.Instruction si in instruction.subInstructions)
                 PrintInstructions(si);
+    }
+
+    void PrintNutritionFacts(Recipe recipe) 
+    {
+        foreach (Recipe.NutritionFact nf in recipe.NutritionFacts)
+        {
+            Console.WriteLine(nf.label.ToUpper() + nf.value + nf.unit);
+        }
     }
 }

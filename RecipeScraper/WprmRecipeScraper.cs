@@ -37,15 +37,42 @@ public class WprmRecipeScraper : IRecipeScraper
         else
             ingredientsTask = Task.Run<List<Recipe.IngredientGroup>>(() => { return new List<Recipe.IngredientGroup>(); });
 
+        Task<List<Recipe.NutritionFact>> nutritionFactsTask;
+        if (scrapeNutritionFacts)
+            nutritionFactsTask = ExtractNutritionFactsFromPage(page, errors); 
+        else
+            nutritionFactsTask = Task.Run<List<Recipe.NutritionFact>>(() => { return new List<Recipe.NutritionFact>(); });
 
-        await Task.WhenAll(instructionsTask, ingredientsTask);
+
+        await Task.WhenAll(instructionsTask, ingredientsTask, nutritionFactsTask);
 
         recipe.Instructions = instructionsTask.Result;
         recipe.Ingredients = ingredientsTask.Result;
-
+        recipe.NutritionFacts = nutritionFactsTask.Result;
 
 
         return recipe;
+    }
+
+
+    private async Task<List<Recipe.NutritionFact>> ExtractNutritionFactsFromPage(IPage page, List<String> errors) 
+    {
+        IElementHandle nutritionFactsContainer = await page.QuerySelectorAsync("div[class*='wprm-nutrition-label-container']");
+
+        IElementHandle[] nutritionFactSections = await nutritionFactsContainer.QuerySelectorAllAsync("span[class*='wprm-nutrition-label-text-nutrition-container']");
+        
+        List<Recipe.NutritionFact> nutritionFacts = new List<Recipe.NutritionFact>();
+
+        foreach (IElementHandle nutritionFact in nutritionFactSections)
+        {
+            String label = await nutritionFact.QuerySelectorAsync("span[class*='wprm-nutrition-label-text-nutrition-label']")?.EvaluateFunctionAsync<String>("e => e.innerText") ?? "";
+            String value = await nutritionFact.QuerySelectorAsync("span[class*='wprm-nutrition-label-text-nutrition-value']")?.EvaluateFunctionAsync<String>("e => e.innerText") ?? "";
+            String unit = await nutritionFact.QuerySelectorAsync("span[class*='wprm-nutrition-label-text-nutrition-unit']")?.EvaluateFunctionAsync<String>("e => e.innerText") ?? "";
+
+            nutritionFacts.Add(new Recipe.NutritionFact(label, unit, value));
+        }
+        
+        return nutritionFacts;
     }
 
     private async Task<List<Recipe.Instruction>> ExtractInstructionsFromPage(IPage page, List<String> errors) 
@@ -82,8 +109,6 @@ public class WprmRecipeScraper : IRecipeScraper
 
         return instructions;
     }
-
-
 
     private async Task<List<Recipe.IngredientGroup>> ExtractIngredientGroupsFromPage(IPage page, bool metric, List<String> errors) 
     {
