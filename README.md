@@ -1,4 +1,4 @@
-# Recipeasy
+# WPRM-RecipeArchiver
 
 This is a small tool to extract recipe data from cooking blogs. This data includes the ingredients, instructions, and nutrition facts. Most recipe blogs use the _WP Recipe Maker_ service to build their site. This tool currently only supports such sites.
 
