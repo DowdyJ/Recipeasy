@@ -9,7 +9,7 @@ class Program
 {
     static async Task Main (String[] args)
     {
-        String url = @"https://www.justonecookbook.com/zosui-japanese-rice-soup/";
+        String url = args[0];
 
         using BrowserFetcher browserFetcher = new BrowserFetcher();
         await browserFetcher.DownloadAsync(BrowserFetcher.DefaultChromiumRevision);
